@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		650F68011E05B1220003CC04 /* tilemap_example2.tmx in Resources */ = {isa = PBXBuildFile; fileRef = 650F68001E05B1220003CC04 /* tilemap_example2.tmx */; };
+		650F68021E05B1220003CC04 /* tilemap_example2.tmx in Resources */ = {isa = PBXBuildFile; fileRef = 650F68001E05B1220003CC04 /* tilemap_example2.tmx */; };
 		D836493F1CCEC77B00A1CEB3 /* SKTilemapCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = D836493D1CCEC77B00A1CEB3 /* SKTilemapCamera.swift */; };
 		D83649401CCEC77B00A1CEB3 /* SKTilemapCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = D836493D1CCEC77B00A1CEB3 /* SKTilemapCamera.swift */; };
 		D83649411CCEC77B00A1CEB3 /* SKTilemapCamera+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D836493E1CCEC77B00A1CEB3 /* SKTilemapCamera+Extension.swift */; };
@@ -49,6 +51,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		650F68001E05B1220003CC04 /* tilemap_example2.tmx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = tilemap_example2.tmx; sourceTree = "<group>"; };
 		D8051D351CCBCA1100465AC6 /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		D8051D361CCBCA1100465AC6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		D8051D371CCBCA4100465AC6 /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
@@ -195,6 +198,7 @@
 			children = (
 				D83649641CCF47C100A1CEB3 /* iso_tileset.atlas */,
 				D8BA4DF41CC93F8A00E1D612 /* tmw_desert_spacing.png */,
+				650F68001E05B1220003CC04 /* tilemap_example2.tmx */,
 				D83649671CCF47FE00A1CEB3 /* tilemap_example.tmx */,
 				D8B06D121CE27A5200775566 /* collision_tile.png */,
 			);
@@ -286,6 +290,7 @@
 				D83649651CCF47C100A1CEB3 /* iso_tileset.atlas in Resources */,
 				D8BA4E011CC93F8A00E1D612 /* tmw_desert_spacing.png in Resources */,
 				D8B06D131CE27A5200775566 /* collision_tile.png in Resources */,
+				650F68011E05B1220003CC04 /* tilemap_example2.tmx in Resources */,
 				D83649681CCF47FE00A1CEB3 /* tilemap_example.tmx in Resources */,
 				D8BA4D931CC935F700E1D612 /* Assets.xcassets in Resources */,
 				D8BA4D911CC935F700E1D612 /* Main.storyboard in Resources */,
@@ -298,6 +303,7 @@
 			files = (
 				D8B06D141CE27A5200775566 /* collision_tile.png in Resources */,
 				D8BA4DD21CC9374C00E1D612 /* Assets.xcassets in Resources */,
+				650F68021E05B1220003CC04 /* tilemap_example2.tmx in Resources */,
 				D83649691CCF47FE00A1CEB3 /* tilemap_example.tmx in Resources */,
 				D83649661CCF47C100A1CEB3 /* iso_tileset.atlas in Resources */,
 				D8BA4E021CC93F8A00E1D612 /* tmw_desert_spacing.png in Resources */,

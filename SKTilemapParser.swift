@@ -57,7 +57,7 @@ class SKTilemapParser : NSObject, XMLParserDelegate {
     func loadTilemap(filename: String) -> SKTilemap? {
         
         guard
-            let path = Bundle.main.path(forResource: filename, ofType: ".tmx"),
+            let path = Bundle.main.path(forResource: filename, ofType: "tmx"),
             let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else {
                 print("SKTilemapParser: Failed to load tilemap '\(filename)'.")
                 return nil

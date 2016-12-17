@@ -81,7 +81,7 @@ class GameScene: SKScene {
         sceneCamera.zoomRange.max = 2.0
         
         /* Load Tilemap from .tmx file. */
-        guard let tilemap = SKTilemap.loadTMX(name: "tilemap_example") else {
+        guard let tilemap = SKTilemap.loadTMX(name: "tilemap_example2") else {
             fatalError("Failed to load tilemap.")
         }
         
