@@ -64,7 +64,7 @@ class GameScene: SKScene {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func didMoveToView(view: SKView) {
+    override func didMove(to view: SKView) {
         
         /* Initial Setup */
         /**************************************************************************************************************/
@@ -124,7 +124,8 @@ class GameScene: SKScene {
             way to do things when using Tiled as you get a visual represtantion. This layer is usually set to "hidden"
             and will not appear in the game. How ever for this example is has been left on. Check out the .tmx file
             to see how it works. */
-        tilemap.initializeGraph(collisionLayerName: "collision layer", diagonalsAllowed: false)
+        //@@FIXME
+        //tilemap.initializeGraph(collisionLayerName: "collision layer", diagonalsAllowed: false)
         
         /* The second way is to have each tile have a certain property that you set either programatically or in Tiled.
             The property can be called anything you want and does not need a value. 
@@ -161,7 +162,7 @@ class GameScene: SKScene {
                         its probably a bad idea to add objects directly to the layer. It would be better if all your game
                         objects shared the same coordinate space. This includes the player, enemies and anything else. 
                         So instead we will add this object to the worldNode. */
-                    let worldPosition = worldNode.convertPoint(layerPosition, fromNode: layer)
+                    let worldPosition = worldNode.convert(layerPosition, from: layer)
                     
                     /* This new sprite will share a texture loaded from the tileset. It could easily be loaded from else
                         where. For this example we know the tile with ID 46 represents a sign so we will use that. */
@@ -173,7 +174,8 @@ class GameScene: SKScene {
                     
                     /* We want the sign to be "collidable" so remove the node at its position within the path finding
                         graph. */
-                    tilemap.removeGraphNodeAtPosition(object.coord)
+                    //@@FIXME
+                    //tilemap.removeGraphNodeAtPosition(object.coord)
                 }
             }
             
@@ -236,19 +238,19 @@ class GameScene: SKScene {
 // MARK: Input OSX
     
 #if os(OSX)
-    override func mouseDown(theEvent: NSEvent) {
+    override func mouseDown(with theEvent: NSEvent) {
     }
     
-    override func mouseUp(theEvent: NSEvent) {
+    override func mouseUp(with theEvent: NSEvent) {
         sceneCamera.finishedInput()
     }
     
-    override func mouseDragged(theEvent: NSEvent) {
+    override func mouseDragged(with theEvent: NSEvent) {
         sceneCamera.updatePosition(theEvent)
         
     }
     
-    override func didChangeSize(oldSize: CGSize) {
+    override func didChangeSize(_ oldSize: CGSize) {
     
         guard let view = scene?.view else { return }
         

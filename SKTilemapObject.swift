@@ -83,9 +83,9 @@ class SKTilemapObject : Equatable, Hashable {
     init?(objectGroup: SKTilemapObjectGroup, tmxParserAttributes attributes: [String : String]) {
         
         guard
-            let id = attributes["id"] where (Int(id) != nil),
-            let x = attributes["x"] where (Int(x) != nil),
-            let y = attributes["y"] where (Int(y) != nil)
+            let id = attributes["id"], (Int(id) != nil),
+            let x = attributes["x"], (Int(x) != nil),
+            let y = attributes["y"], (Int(y) != nil)
             else {
                 
                 print("SKTilemapObject: Failed to initialize with tmxAttributes.")
@@ -95,12 +95,12 @@ class SKTilemapObject : Equatable, Hashable {
         self.id = Int(id)!
         self.rawPosition = CGPoint(x: Int(x)!, y: Int(y)!)
         
-        if let width = attributes["width"] where (Int(width)) != nil,
-            let height = attributes["height"] where (Int(height) != nil) {
+        if let width = attributes["width"], (Int(width)) != nil,
+            let height = attributes["height"], (Int(height) != nil) {
             
             size = CGSize(width: Int(width)!, height: Int(height)!)
         } else {
-            size = CGSizeZero
+            size = CGSize.zero
         }
         
         if let name = attributes["name"] { self.name = name } else { name = "" }
@@ -116,13 +116,13 @@ class SKTilemapObject : Equatable, Hashable {
     
     /* Returns the position of this object on a certain tilemap layer. This position will share the same position as 
         the tile at this position. */
-    func positionOnLayer(layer: SKTilemapLayer) -> CGPoint {
+    func positionOnLayer(_ layer: SKTilemapLayer) -> CGPoint {
         return layer.tilePositionAtCoord(Int(coord.x), Int(coord.y), offset: objectGroup.offset)
     }
     
     /* Returns the position of this object on a certain tilemap layer. This position will share the same position as
      the tile at this position. Can return nil if a layer cannot be found with that name. */
-    func positionOnLayerNamed(name: String) -> CGPoint? {
+    func positionOnLayerNamed(_ name: String) -> CGPoint? {
         if let layer = objectGroup.tilemap.getLayer(name: name) {
             return positionOnLayer(layer)
         }

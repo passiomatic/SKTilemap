@@ -41,9 +41,9 @@ import SpriteKit
 
 protocol SKTilemapCameraDelegate : class {
     
-    func didUpdatePosition(position position: CGPoint, scale: CGFloat, bounds: CGRect)
-    func didUpdateZoomScale(position position: CGPoint, scale: CGFloat, bounds: CGRect)
-    func didUpdateBounds(position position: CGPoint, scale: CGFloat, bounds: CGRect)
+    func didUpdatePosition(position: CGPoint, scale: CGFloat, bounds: CGRect)
+    func didUpdateZoomScale(position: CGPoint, scale: CGFloat, bounds: CGRect)
+    func didUpdateBounds(position: CGPoint, scale: CGFloat, bounds: CGRect)
 }
 
 // MARK: Camera
@@ -55,10 +55,10 @@ class SKTilemapCamera : SKCameraNode {
     let worldNode: SKNode
     
     /** Bounds the camera constrains the worldNode to. Default value is the size of the view but this can be changed. */
-    private var bounds: CGRect
+    fileprivate var bounds: CGRect
     
     /** The current zoom scale of the camera. */
-    private var zoomScale: CGFloat
+    fileprivate var zoomScale: CGFloat
     
     /** Min/Max scale the camera can zoom in/out. */
     var zoomRange: (min: CGFloat, max: CGFloat)
@@ -66,7 +66,7 @@ class SKTilemapCamera : SKCameraNode {
     /** Enable/Disable the ability to zoom the camera. */
     var allowZoom: Bool
     
-    private var isEnabled: Bool
+    fileprivate var isEnabled: Bool
     
     /** Enable/Disable the camera. */
     var enabled: Bool {
@@ -85,10 +85,10 @@ class SKTilemapCamera : SKCameraNode {
     var enableClamping: Bool
     
     /** Delegates are informed when the camera repositions or performs some other action. */
-    private var delegates: [SKTilemapCameraDelegate] = []
+    fileprivate var delegates: [SKTilemapCameraDelegate] = []
     
     /** Previous touch/mouse location the last time the position was updated. */
-    private var previousLocation: CGPoint!
+    fileprivate var previousLocation: CGPoint!
     
 // MARK: Initialization
     
@@ -124,16 +124,16 @@ class SKTilemapCamera : SKCameraNode {
     }
     
     /** Adds a delegate to camera. Will not allow duplicate delegates to be added. */
-    func addDelegate(delegate: SKTilemapCameraDelegate) {
+    func addDelegate(_ delegate: SKTilemapCameraDelegate) {
         
-        if let _ = delegates.indexOf({ $0 === delegate }) { return }
+        if let _ = delegates.index(where: { $0 === delegate }) { return }
         delegates.append(delegate)
     }
     
     /** Removes a delegate from the camera. */
-    func removeDelegate(delegate: SKTilemapCameraDelegate) {
-        if let index = delegates.indexOf( { $0 === delegate } ) {
-            delegates.removeAtIndex(index)
+    func removeDelegate(_ delegate: SKTilemapCameraDelegate) {
+        if let index = delegates.index( where: { $0 === delegate } ) {
+            delegates.remove(at: index)
         }
     }
     
@@ -194,13 +194,13 @@ class SKTilemapCamera : SKCameraNode {
     
     /** Updates the camera position based on mouse movement.
         Any delegates of the camera will be informed that the camera moved. */
-    func updatePosition(event: NSEvent) {
+    func updatePosition(_ event: NSEvent) {
         
         if scene == nil || !enabled { return }
         
-        if previousLocation == nil { previousLocation = event.locationInNode(self) }
+        if previousLocation == nil { previousLocation = event.location(in: self) }
         
-        let location = event.locationInNode(self)
+        let location = event.location(in: self)
         let difference = CGPoint(x: location.x - previousLocation.x, y: location.y - previousLocation.y)
         centerOnPosition(CGPoint(x: Int(position.x - difference.x), y: Int(position.y - difference.y)))
         previousLocation = location
@@ -217,7 +217,7 @@ class SKTilemapCamera : SKCameraNode {
     
     /** Moves the camera so it centers on a certain position within the scene. Easing can be applied by setting a timing 
         interval. Otherwise the position is changed instantly. */
-    func centerOnPosition(scenePosition: CGPoint, easingDuration: NSTimeInterval = 0) {
+    func centerOnPosition(_ scenePosition: CGPoint, easingDuration: TimeInterval = 0) {
         
         if easingDuration == 0 {
             
@@ -227,23 +227,23 @@ class SKTilemapCamera : SKCameraNode {
             
         } else {
             
-            let moveAction = SKAction.moveTo(scenePosition, duration: easingDuration)
-            moveAction.timingMode = .EaseOut
+            let moveAction = SKAction.move(to: scenePosition, duration: easingDuration)
+            moveAction.timingMode = .easeOut
             
-            let blockAction = SKAction.runBlock({
+            let blockAction = SKAction.run({
                 self.clampWorldNode()
                 for delegate in self.delegates { delegate.didUpdatePosition(position: self.position, scale: self.zoomScale, bounds: self.bounds) }
             })
             
-            runAction(SKAction.group([moveAction, blockAction]))
+            run(SKAction.group([moveAction, blockAction]))
         }
     }
     
-    override func centerOnNode(node: SKNode?, easingDuration: NSTimeInterval = 0) {
+    func centerOnNode(_ node: SKNode?, easingDuration: TimeInterval = 0) {
         
-        guard let theNode = node where theNode.parent != nil else { return }
+        guard let theNode = node, theNode.parent != nil else { return }
         
-        let position = scene!.convertPoint(theNode.position, fromNode: theNode.parent!)
+        let position = scene!.convert(theNode.position, from: theNode.parent!)
         centerOnPosition(position, easingDuration: easingDuration)
     }
     
@@ -251,7 +251,7 @@ class SKTilemapCamera : SKCameraNode {
     
     /** Applies a scale to the worldNode. Ensures that the scale stays within its range and that the worldNode is 
         clamped within its bounds. */
-    func applyZoomScale(scale: CGFloat) {
+    func applyZoomScale(_ scale: CGFloat) {
         
         var zoomScale = scale
         
@@ -273,7 +273,7 @@ class SKTilemapCamera : SKCameraNode {
         
         let frame = worldNode.calculateAccumulatedFrame()
         
-        if bounds == CGRectZero || frame == CGRectZero { return 0 }
+        if bounds == CGRect.zero || frame == CGRect.zero { return 0 }
         
         let xScale = (bounds.width * zoomScale) / frame.width
         let yScale = (bounds.height * zoomScale) / frame.height
@@ -284,7 +284,7 @@ class SKTilemapCamera : SKCameraNode {
     
     /** Keeps the worldNode clamped between a specific bounds. If the worldNode is smaller than these bounds it will
      stop it from moving outside of those bounds. */
-    private func clampWorldNode() {
+    fileprivate func clampWorldNode() {
         
         if !enableClamping { return }
         
@@ -321,7 +321,7 @@ class SKTilemapCamera : SKCameraNode {
     }
     
     /** Updates the bounds for the worldNode to be constrained to. Will inform all delegates this change occured. */
-    func updateBounds(bounds: CGRect) {
+    func updateBounds(_ bounds: CGRect) {
         
         self.bounds = bounds
         for delegate in delegates { delegate.didUpdateBounds(position: position, scale: zoomScale, bounds: self.bounds) }

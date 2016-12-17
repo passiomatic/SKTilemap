@@ -36,6 +36,30 @@
 
 import SpriteKit
 import GameplayKit
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
 
 // MARK: SKTilemapOrientation
 enum SKTilemapOrientation : String {
@@ -69,25 +93,25 @@ class SKTilemap : SKNode {
     
     /** The dimensions of the tilemap in tiles. */
     let size: CGSize
-    private var sizeHalved: CGSize { get { return CGSize(width: width / 2, height: height / 2) } }
+    fileprivate var sizeHalved: CGSize { get { return CGSize(width: width / 2, height: height / 2) } }
     var width: Int { return Int(size.width) }
     var height: Int { return Int(size.height) }
     
     /** The size of the grid for the tilemap. Note that tilesets may have differently sized tiles. */
     let tileSize: CGSize
-    private var tileSizeHalved: CGSize { get { return CGSize(width: tileSize.width / 2, height: tileSize.height / 2) } }
+    fileprivate var tileSizeHalved: CGSize { get { return CGSize(width: tileSize.width / 2, height: tileSize.height / 2) } }
     
     /** The orientation of the tilemap. See SKTilemapOrientation for valid orientations. */
     let orientation: SKTilemapOrientation
     
     /** The tilesets this tilemap contains. */
-    private var tilesets: Set<SKTilemapTileset> = []
+    fileprivate var tilesets: Set<SKTilemapTileset> = []
     
     /** The layers this tilemap contains. */
-    private var tileLayers: Set<SKTilemapLayer> = []
+    fileprivate var tileLayers: Set<SKTilemapLayer> = []
     
     /** The object groups this tilemap contains */
-    private var objectGroups: Set<SKTilemapObjectGroup> = []
+    fileprivate var objectGroups: Set<SKTilemapObjectGroup> = []
     
     /** The display bounds the viewable area of this tilemap should be constrained to. Tiles positioned outside this 
         rectangle will not be shown. This should speed up performance for large tilemaps when tile clipping is enabled. 
@@ -95,7 +119,7 @@ class SKTilemap : SKNode {
     var displayBounds: CGRect?
     
     /** Internal property for the layer alignment. */
-    private var layerAlignment = CGPoint(x: 0.5, y: 0.5)
+    fileprivate var layerAlignment = CGPoint(x: 0.5, y: 0.5)
 
     /** Used to set how the layers are aligned within the map much like an anchorPoint on a sprite node.
     + 0 - The layers left/bottom most edge will rest at 0 in the scene
@@ -110,7 +134,7 @@ class SKTilemap : SKNode {
     }
     
     /** Internal var for whether tile clipping is enabled or disabled. */
-    private var useTileClipping = false
+    fileprivate var useTileClipping = false
     
     /** Enables tile clipping on this tilemap. */
     var enableTileClipping: Bool {
@@ -130,7 +154,7 @@ class SKTilemap : SKNode {
                         for x in 0..<width {
                             for layer in tileLayers {
                                 if let tile = layer.tileAtCoord(x, y) {
-                                    tile.hidden = true
+                                    tile.isHidden = true
                                 }
                             }
                         }
@@ -146,7 +170,7 @@ class SKTilemap : SKNode {
                     for x in 0..<width {
                         for layer in tileLayers {
                             if let tile = layer.tileAtCoord(x, y) {
-                                tile.hidden = false
+                                tile.isHidden = false
                             }
                         }
                     }
@@ -163,11 +187,11 @@ class SKTilemap : SKNode {
         Experiment with this value to see what's best for your map.
         This is only needed if you plan on scaling the tilemap.*/
     var minTileClippingScale: CGFloat = 0.6
-    private var disableTileClipping = false
+    fileprivate var disableTileClipping = false
     
     /** The graph used for path finding around the tilemap. To initialize it implement one of the SKTilemapPathFindingProtocol
         functions. */
-    var pathFindingGraph: GKGridGraph?
+    var pathFindingGraph: GKGridGraph<GKGridGraphNode>?
     var removedGraphNodes: [GKGridGraphNode] = []
     
     /** Returns the next available global ID to use. Useful for adding new tiles to a tileset or working out a tilesets
@@ -203,12 +227,12 @@ class SKTilemap : SKNode {
     init?(filename: String, tmxParserAttributes attributes: [String : String]) {
         
         guard
-            let version = attributes["version"] where (Double(version) != nil),
-            let width = attributes["width"] where (Int(width) != nil),
-            let height = attributes["height"] where (Int(height) != nil),
-            let tileWidth = attributes["tilewidth"] where (Int(tileWidth) != nil),
-            let tileHeight = attributes["tileheight"] where (Int(tileHeight) != nil),
-            let orientation = attributes["orientation"] where (SKTilemapOrientation(rawValue: orientation) != nil)
+            let version = attributes["version"], (Double(version) != nil),
+            let width = attributes["width"], (Int(width) != nil),
+            let height = attributes["height"], (Int(height) != nil),
+            let tileWidth = attributes["tilewidth"], (Int(tileWidth) != nil),
+            let tileHeight = attributes["tileheight"], (Int(tileHeight) != nil),
+            let orientation = attributes["orientation"], (SKTilemapOrientation(rawValue: orientation) != nil)
             else {
                 print("SKTilemap: Failed to initialize with tmxAttributes.")
                 return nil
@@ -229,12 +253,12 @@ class SKTilemap : SKNode {
     }
     
     /** Loads a tilemap from .tmx file. */
-    class func loadTMX(name name: String) -> SKTilemap? {
-        let time = NSDate()
+    class func loadTMX(name: String) -> SKTilemap? {
+        let time = Date()
         
         if let tilemap = SKTilemapParser().loadTilemap(filename: name) {
             tilemap.printDebugDescription()
-            print("\nSKTilemap: Loaded tilemap '\(name)' in \(NSDate().timeIntervalSinceDate(time)) seconds.")
+            print("\nSKTilemap: Loaded tilemap '\(name)' in \(Date().timeIntervalSince(time)) seconds.")
             return tilemap
         }
         
@@ -257,9 +281,9 @@ class SKTilemap : SKNode {
     
     /** Adds a tileset to the tilemap. Returns nil on failure. (A tileset with the same name already exists). Or 
         or returns the tileset. */
-    func add(tileset tileset: SKTilemapTileset) -> SKTilemapTileset? {
+    func add(tileset: SKTilemapTileset) -> SKTilemapTileset? {
         
-        if tilesets.contains({ $0.hashValue == tileset.hashValue }) {
+        if tilesets.contains(where: { $0.hashValue == tileset.hashValue }) {
             print("SKTilemap: Failed to add tileset. A tileset with the same name already exists.")
             return nil
         }
@@ -269,9 +293,9 @@ class SKTilemap : SKNode {
     }
     
     /** Returns a tileset with specified name or nil if it doesn't exist. */
-    func getTileset(name name: String) -> SKTilemapTileset? {
+    func getTileset(name: String) -> SKTilemapTileset? {
         
-        if let index = tilesets.indexOf( { $0.name == name } ) {
+        if let index = tilesets.index( where: { $0.name == name } ) {
             return tilesets[index]
         }
         
@@ -280,7 +304,7 @@ class SKTilemap : SKNode {
     
     /** Will return a SKTilemapTileData object with matching id from one of the tilesets associated with this tilemap
         or nil if no match can be found. */
-    func getTileData(id id: Int) -> SKTilemapTileData? {
+    func getTileData(id: Int) -> SKTilemapTileData? {
         
         for tileset in tilesets {
             
@@ -297,9 +321,9 @@ class SKTilemap : SKNode {
     /** Adds a tile layer to the tilemap. A zPosition can be supplied and will be applied to the layer. If no zPosition
         is supplied, the layer is assumed to be placed on top of all others. Returns nil on failure. (A layer with the
         same name already exists. Or returns the layer. */
-    func add(tileLayer tileLayer: SKTilemapLayer, zPosition: CGFloat? = nil) -> SKTilemapLayer? {
+    func add(tileLayer: SKTilemapLayer, zPosition: CGFloat? = nil) -> SKTilemapLayer? {
         
-        if tileLayers.contains({ $0.hashValue == tileLayer.hashValue }) {
+        if tileLayers.contains(where: { $0.hashValue == tileLayer.hashValue }) {
             print("SKTilemap: Failed to add tile layer. A tile layer with the same name already exists.")
             return nil
         }
@@ -331,9 +355,9 @@ class SKTilemap : SKNode {
     }
     
     /** Positions a tilemap layer so that its center position is resting at the tilemaps 0,0 position. */
-    private func alignLayer(layer: SKTilemapLayer) {
+    fileprivate func alignLayer(_ layer: SKTilemapLayer) {
 
-        var position = CGPointZero
+        var position = CGPoint.zero
         
         if orientation == .Orthogonal {
             let sizeInPoints = CGSize(width: size.width * tileSize.width, height: size.height * tileSize.height)
@@ -364,9 +388,9 @@ class SKTilemap : SKNode {
     }
     
     /** Returns a tilemap layer with specified name or nil if one does not exist. */
-    func getLayer(name name: String) -> SKTilemapLayer? {
+    func getLayer(name: String) -> SKTilemapLayer? {
         
-        if let index = tileLayers.indexOf( { $0.name == name } ) {
+        if let index = tileLayers.index( where: { $0.name == name } ) {
             return tileLayers[index]
         }
         
@@ -380,7 +404,7 @@ class SKTilemap : SKNode {
     }
     
     /** Removes a layer from the tilemap. The layer removed is returned or nil if the layer wasn't found. */
-    func removeLayer(name name: String) -> SKTilemapLayer? {
+    func removeLayer(name: String) -> SKTilemapLayer? {
         
         if let layer = getLayer(name: name) {
             
@@ -396,7 +420,7 @@ class SKTilemap : SKNode {
         of a view... which it should be). 
         You must call this function when ever you reposition the tilemap so it can update the visible tiles. 
         For example in a scenes TouchesMoved function if scrolling the tilemap with a touch or mouse. */
-    func clipTilesOutOfBounds(scale scale: CGFloat = 1.0, tileBufferSize: CGFloat = 2) {
+    func clipTilesOutOfBounds(scale: CGFloat = 1.0, tileBufferSize: CGFloat = 2) {
         
         if !useTileClipping && disableTileClipping == false { return }
         
@@ -421,9 +445,9 @@ class SKTilemap : SKNode {
     
     /** Adds an object group to the tilemap. Returns nil on failure. (An object group with the same name already exists.
         Or returns the object group. */
-    func add(objectGroup objectGroup: SKTilemapObjectGroup) -> SKTilemapObjectGroup? {
+    func add(objectGroup: SKTilemapObjectGroup) -> SKTilemapObjectGroup? {
         
-        if objectGroups.contains({ $0.hashValue == objectGroup.hashValue }) {
+        if objectGroups.contains(where: { $0.hashValue == objectGroup.hashValue }) {
             print("SKTilemap: Failed to add object layer. An object layer with the same name already exists.")
             return nil
         }
@@ -433,9 +457,9 @@ class SKTilemap : SKNode {
     }
     
     /** Returns a object group with specified name or nil if it does not exist. */
-    func getObjectGroup(name name: String) -> SKTilemapObjectGroup? {
+    func getObjectGroup(name: String) -> SKTilemapObjectGroup? {
         
-        if let index = objectGroups.indexOf( { $0.name == name } ) {
+        if let index = objectGroups.index( where: { $0.name == name } ) {
             return objectGroups[index]
         }
         

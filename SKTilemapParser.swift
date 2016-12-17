@@ -37,34 +37,34 @@
 import SpriteKit
 
 // MARK: SKTilemapParser
-class SKTilemapParser : NSObject, NSXMLParserDelegate {
+class SKTilemapParser : NSObject, XMLParserDelegate {
     
 // MARK: Properties
-    private var errorMessage = ""
-    private var characters = ""
-    private var encoding = ""
-    private var data: [Int] = []
-    private var lastElement: AnyObject?
-    private var lastID: Int?
+    fileprivate var errorMessage = ""
+    fileprivate var characters = ""
+    fileprivate var encoding = ""
+    fileprivate var data: [Int] = []
+    fileprivate var lastElement: AnyObject?
+    fileprivate var lastID: Int?
     internal var properties: [String : String] = [:]
     
-    private var filename = ""
-    private var tilemap: SKTilemap?
+    fileprivate var filename = ""
+    fileprivate var tilemap: SKTilemap?
     
 // MARK: Functions
     
     /** Load an SKTilemap from a .tmx tilemap file. */
-    func loadTilemap(filename filename: String) -> SKTilemap? {
+    func loadTilemap(filename: String) -> SKTilemap? {
         
         guard
-            let path = NSBundle.mainBundle().pathForResource(filename, ofType: ".tmx"),
-            let data = NSData(contentsOfFile: path) else {
+            let path = Bundle.main.path(forResource: filename, ofType: ".tmx"),
+            let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else {
                 print("SKTilemapParser: Failed to load tilemap '\(filename)'.")
                 return nil
         }
         
         self.filename = filename
-        let parser = NSXMLParser(data: data)
+        let parser = XMLParser(data: data)
         parser.delegate = self
         errorMessage = "SKTilemapParser: Couldn't load file \(filename)"
         
@@ -77,7 +77,7 @@ class SKTilemapParser : NSObject, NSXMLParserDelegate {
     }
     
 // MARK: NSXMLParser Delegate Functions
-    func parser(parser: NSXMLParser, didStartElement elementName: String, namespaceURI: String?,
+    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?,
                 qualifiedName qName: String?, attributes attributeDict: [String : String]) {
         
         if elementName == "map" {
@@ -105,8 +105,8 @@ class SKTilemapParser : NSObject, NSXMLParserDelegate {
         if elementName == "tileoffset" {
             
             guard
-                let x = attributeDict["x"] where (Int(x) != nil),
-                let y = attributeDict["y"] where (Int(y) != nil),
+                let x = attributeDict["x"], (Int(x) != nil),
+                let y = attributeDict["y"], (Int(y) != nil),
                 let tileset = lastElement as? SKTilemapTileset
                 else {
                     errorMessage = "SKTilemapParser: Failed to parse <tileoffset>. [\(parser.lineNumber)]"
@@ -139,10 +139,10 @@ class SKTilemapParser : NSObject, NSXMLParserDelegate {
         
         if elementName == "tile" {
             
-            if let gid = attributeDict["gid"] where (Int(gid) != nil) && encoding == "xml" {
+            if let gid = attributeDict["gid"], (Int(gid) != nil) && encoding == "xml" {
                 data.append(Int(gid)!)
             }
-            else if let id = attributeDict["id"] where (Int(id) != nil) {
+            else if let id = attributeDict["id"], (Int(id) != nil) {
                 lastID = Int(id)!
             } else {
                 errorMessage = "SKTilemapParser: Failed to parse <tile>. [\(parser.lineNumber)]"
@@ -154,9 +154,9 @@ class SKTilemapParser : NSObject, NSXMLParserDelegate {
         if elementName == "frame" {
             
             guard
-                let id = attributeDict["tileid"] where (Int(id) != nil),
-                let duration = attributeDict["duration"] where (Int(duration) != nil),
-                let tileset = (lastElement as? SKTilemapTileset) where (lastID != nil),
+                let id = attributeDict["tileid"], (Int(id) != nil),
+                let duration = attributeDict["duration"], (Int(duration) != nil),
+                let tileset = (lastElement as? SKTilemapTileset), (lastID != nil),
                 let tileData = tileset.getTileData(id: lastID! + tileset.firstGID)
                 else {
                     errorMessage = "SKTilemapParser: Failed to parse <frame>. [\(parser.lineNumber)]"
@@ -233,12 +233,12 @@ class SKTilemapParser : NSObject, NSXMLParserDelegate {
         }
     }
     
-    func parser(parser: NSXMLParser, didEndElement elementName: String, namespaceURI: String?,
+    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?,
                 qualifiedName qName: String?) {
         
         if elementName == "tile" {
             
-            if let tileset = lastElement as? SKTilemapTileset where (lastID != nil) {
+            if let tileset = lastElement as? SKTilemapTileset, (lastID != nil) {
                 tileset.getTileData(id: tileset.firstGID + lastID!)?.properties = properties
                 properties = [:]
             }
@@ -248,7 +248,7 @@ class SKTilemapParser : NSObject, NSXMLParserDelegate {
         
         if elementName == "object" {
             
-            if let objectGroup = lastElement as? SKTilemapObjectGroup where (lastID != nil) {
+            if let objectGroup = lastElement as? SKTilemapObjectGroup, (lastID != nil) {
                 objectGroup.getObject(id: lastID!)?.properties = properties
                 properties = [:]
             }
@@ -259,9 +259,9 @@ class SKTilemapParser : NSObject, NSXMLParserDelegate {
         if elementName == "properties" {
             
             if let tilemap = lastElement as? SKTilemap { tilemap.properties = properties }
-            if let tileset = lastElement as? SKTilemapTileset where (lastID == nil) { tileset.properties = properties }
+            if let tileset = lastElement as? SKTilemapTileset, (lastID == nil) { tileset.properties = properties }
             if let layer = lastElement as? SKTilemapLayer { layer.properties = properties }
-            if let objectGroup = lastElement as? SKTilemapObjectGroup where (lastID == nil) { objectGroup.properties = properties }
+            if let objectGroup = lastElement as? SKTilemapObjectGroup, (lastID == nil) { objectGroup.properties = properties }
             
             if lastID == nil {
                 properties = [:]
@@ -282,10 +282,10 @@ class SKTilemapParser : NSObject, NSXMLParserDelegate {
             }
             
             if encoding == "csv" {
-                characters = characters.stringByReplacingOccurrencesOfString("\n", withString: "")
-                characters = characters.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-                characters = characters.stringByReplacingOccurrencesOfString(" ", withString: "")
-                let stringData = characters.componentsSeparatedByString(",")
+                characters = characters.replacingOccurrences(of: "\n", with: "")
+                characters = characters.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                characters = characters.replacingOccurrences(of: " ", with: "")
+                let stringData = characters.components(separatedBy: ",")
                 
                 for stringID in stringData {
                     
@@ -299,11 +299,11 @@ class SKTilemapParser : NSObject, NSXMLParserDelegate {
             
             if encoding == "base64" {
                 
-                if let base64Data = NSData(base64EncodedString: characters, options: .IgnoreUnknownCharacters) {
+                if let base64Data = Data(base64Encoded: characters, options: .ignoreUnknownCharacters) {
                     
-                    let count = base64Data.length / sizeof(Int32)
-                    var arr = [Int32](count: count, repeatedValue: 0)
-                    base64Data.getBytes(&arr, length: count * sizeof(Int32))
+                    let count = base64Data.count / MemoryLayout<Int32>.size
+                    var arr = [Int32](repeating: 0, count: count)
+                    (base64Data as NSData).getBytes(&arr, length: count * MemoryLayout<Int32>.size)
                     
                     for id in arr {
                         data.append(Int(id))
@@ -327,7 +327,7 @@ class SKTilemapParser : NSObject, NSXMLParserDelegate {
         characters = ""
     }
     
-    func parser(parser: NSXMLParser, foundCharacters string: String) {
+    func parser(_ parser: XMLParser, foundCharacters string: String) {
         characters += string
     }
 }

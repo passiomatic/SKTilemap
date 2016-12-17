@@ -44,11 +44,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBOutlet weak var window: NSWindow!
     @IBOutlet weak var skView: SKView!
     
-    func applicationDidFinishLaunching(aNotification: NSNotification) {
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
         
         window.setContentSize(NSSize(width: 1024, height: 768))
         
-        skView.frameInterval = 1 / 60
+        //skView.frameInterval = 1 / 60
         
         skView.showsFPS = true
         skView.showsNodeCount = true
@@ -61,11 +61,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         skView.ignoresSiblingOrder = true
         
         let scene = GameScene(size: skView.bounds.size)
-        scene.scaleMode = .ResizeFill
+        scene.scaleMode = .resizeFill
         skView.presentScene(scene)
     }
     
-    func applicationShouldTerminateAfterLastWindowClosed(sender: NSApplication) -> Bool {
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return true
     }
 }
