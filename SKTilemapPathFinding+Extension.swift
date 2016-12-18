@@ -45,7 +45,7 @@ extension SKTilemap {
     /** Initializes the path finding graph. Tiles on the layers named that have the collision property are treated as
         collidable (walls / non-walkable). Naming all of the collision layers isn't required. If no names are supplied
         all layer tiles are checked for the corresponding property. */
-    func initializeGraph(collisionProperty collisionProperty: String, collisionLayerNames: [String]? = nil, diagonalsAllowed: Bool) -> Bool {
+    func initializeGraph(collisionProperty: String, collisionLayerNames: [String]? = nil, diagonalsAllowed: Bool) -> Bool {
         
         let time = NSDate()
         
@@ -78,23 +78,23 @@ extension SKTilemap {
                 
                 for layer in layers {
                     
-                    if let tile = layer.tileAtCoord(x, y) where tile.tileData.properties[collisionProperty] != nil {
-                        nodesToRemove.append(pathFindingGraph!.nodeAtGridPosition(vector2(Int32(x), Int32(y)))!)
+                    if let tile = layer.tileAtCoord(x, y), tile.tileData.properties[collisionProperty] != nil {
+                        nodesToRemove.append(pathFindingGraph!.node(atGridPosition: vector2(Int32(x), Int32(y)))!)
                         break
                     }
                 }
             }
         }
         
-        pathFindingGraph?.removeNodes(nodesToRemove)
+        pathFindingGraph?.remove(nodesToRemove)
         
-        print("SKTilemap: Initialized path finding graph in \(NSDate().timeIntervalSinceDate(time)) seconds. \(nodesToRemove.count) collidable nodes were removed.")
+        print("SKTilemap: Initialized path finding graph in \(NSDate().timeIntervalSince(time as Date)) seconds. \(nodesToRemove.count) collidable nodes were removed.")
         
         return true
     }
     
     /** Initializes the path finding graph. All tiles on the given layer are treated as collidable tiles (walls / non-walkable). */
-    func initializeGraph(collisionLayerName collisionLayerName: String, diagonalsAllowed: Bool) -> Bool {
+    func initializeGraph(collisionLayerName: String, diagonalsAllowed: Bool) -> Bool {
         
         let time = NSDate()
         
@@ -112,14 +112,14 @@ extension SKTilemap {
             for x in 0..<width {
                 
                 if layer.tileAtCoord(x, y) != nil {
-                    nodesToRemove.append(pathFindingGraph!.nodeAtGridPosition(vector2(Int32(x), Int32(y)))!)
+                    nodesToRemove.append(pathFindingGraph!.node(atGridPosition: vector2(Int32(x), Int32(y)))!)
                 }
             }
         }
         
-        pathFindingGraph?.removeNodes(nodesToRemove)
+        pathFindingGraph?.remove(nodesToRemove)
         
-        print("SKTilemap: Initialized path finding graph in \(NSDate().timeIntervalSinceDate(time)) seconds. \(nodesToRemove.count) collidable nodes were removed.")
+        print("SKTilemap: Initialized path finding graph in \(NSDate().timeIntervalSince(time as Date)) seconds. \(nodesToRemove.count) collidable nodes were removed.")
         
         return true
     }
@@ -130,7 +130,7 @@ extension SKTilemap {
         Optional parameter removes the starting position from the returned graph, which is usually desired. How ever it
         can be turned off.
         Returns an array of tilemap coordinates representing the path from start to finish. */
-    func findPathFrom(x x: Int32, y: Int32, toX: Int32, toY: Int32, removeStartPosition: Bool = true) -> [CGPoint]? {
+    func findPathFrom(x: Int32, y: Int32, toX: Int32, toY: Int32, removeStartPosition: Bool = true) -> [CGPoint]? {
         
         if x == toX && y == toY {
             //print("SKTilemap: Failed to find path. Start and End points are the same.")
@@ -142,17 +142,17 @@ extension SKTilemap {
             return nil
         }
         
-        guard let fromNode = graph.nodeAtGridPosition(vector2(x, y)) else {
+        guard let fromNode = graph.node(atGridPosition: vector2(x, y)) else {
             //print("SKTilemap. Failed to find path. Invalid start position.")
             return nil
         }
         
-        guard let toNode = graph.nodeAtGridPosition(vector2(toX, toY)) else {
+        guard let toNode = graph.node(atGridPosition: vector2(toX, toY)) else {
             //print("SKTilemap. Failed to find path. Invalid end position.")
             return nil
         }
         
-        var path = graph.findPathFromNode(fromNode, toNode: toNode)
+        var path = graph.findPath(from: fromNode, to: toNode)
         
         if (removeStartPosition && path.count <= 1) || path.count == 0 {
             //print("SKTilemap: Failed to find path.")
@@ -168,9 +168,9 @@ extension SKTilemap {
         return findPathFrom(x: Int32(position.x), y: Int32(position.y), toX: Int32(to.x), toY: Int32(to.y), removeStartPosition: removeStartPosition)
     }
     
-    func findPathFrom(position: vector_int2, to: vector_int2, removeStartPosition: Bool = true) -> [CGPoint]? {
-        return findPathFrom(x: position.x, y: position.y, toX: to.x, toY: to.y, removeStartPosition: removeStartPosition)
-    }
+//    func findPathFrom(position: vector_int2, to: vector_int2, removeStartPosition: Bool = true) -> [CGPoint]? {
+//        return findPathFrom(x: position.x, y: position.y, toX: to.x, toY: to.y, removeStartPosition: removeStartPosition)
+//    }
     
     /** Returns the next position excluding starting position on a given path from point A to B. The return value is a tuple
         that, as well as return the next position also returns the total distance of the path. */
@@ -184,7 +184,7 @@ extension SKTilemap {
     }
     
     func nextPositionOnPathFrom(position: CGPoint, to: CGPoint) -> (position: CGPoint, distance: Int)? {
-        if let result = nextPositionOnPathFrom(Int32(position.x), y: Int32(position.y), toX: Int32(to.x), toY: Int32(to.y)) {
+        if let result = nextPositionOnPathFrom(x: Int32(position.x), y: Int32(position.y), toX: Int32(to.x), toY: Int32(to.y)) {
             return (CGPoint(x: Int(result.x), y: Int(result.y)), result.distance)
         }
         
@@ -192,7 +192,7 @@ extension SKTilemap {
     }
     
     func nextPositionOnPathFrom(position: vector_int2, to: vector_int2) -> (position: vector_int2, distance: Int)? {
-        if let result = nextPositionOnPathFrom(position.x, y: position.y, toX: to.x, toY: to.y) {
+        if let result = nextPositionOnPathFrom(x: position.x, y: position.y, toX: to.x, toY: to.y) {
             return (vector_int2(result.x, result.y), result.distance)
         }
         
@@ -200,10 +200,10 @@ extension SKTilemap {
     }
     
     /** Removes a node from the graph. This node can no longer be used when finding a path. */
-    func removeGraphNodeAtPosition(x x: Int32, y: Int32) {
+    func removeGraphNodeAtPosition(x: Int32, y: Int32) {
         
-        if let node = pathFindingGraph?.nodeAtGridPosition(vector2(x, y)) {
-            pathFindingGraph?.removeNodes([node])
+        if let node = pathFindingGraph?.node(atGridPosition: vector2(x, y)) {
+            pathFindingGraph?.remove([node])
             removedGraphNodes.append(node)
         }
     }
@@ -220,20 +220,20 @@ extension SKTilemap {
         first initialized. */
     func resetGraph() {
         
-        pathFindingGraph?.addNodes(removedGraphNodes)
-        removedGraphNodes.forEach({ pathFindingGraph?.connectNodeToAdjacentNodes($0) })
+        pathFindingGraph?.add(removedGraphNodes)
+        removedGraphNodes.forEach({ pathFindingGraph?.connectToAdjacentNodes(node: $0) })
         removedGraphNodes = []
     }
     
     /** Adds a previously removed node to the grid. Does nothing if the grid already has a node at this position.
         Nodes that are added to the grid become valid path positions. */
-    func addGraphNodeAtPosition(x x: Int32, y: Int32) {
+    func addGraphNodeAtPosition(x: Int32, y: Int32) {
         
         guard let graph = pathFindingGraph else { return }
         
         if x < 0 || x >= Int32(graph.gridWidth) || y < 0 || y >= Int32(graph.gridHeight) { return }
         
-        if graph.nodeAtGridPosition(vector2(x, y)) != nil { return }
+        if graph.node(atGridPosition: vector2(x, y)) != nil { return }
         
         var nodeToAdd: GKGridGraphNode?
         
@@ -246,8 +246,8 @@ extension SKTilemap {
         
         if nodeToAdd == nil { return }
         
-        graph.addNodes([nodeToAdd!])
-        graph.connectNodeToAdjacentNodes(nodeToAdd!)
+        graph.add([nodeToAdd!])
+        graph.connectToAdjacentNodes(node: nodeToAdd!)
     }
     
     func addGraphNodeAtPosition(position: CGPoint) {
@@ -260,11 +260,11 @@ extension SKTilemap {
     
     func adjacentNodesAtGridPosition(position: vector_int2) -> [vector_int2] {
         
-        if pathFindingGraph != nil && pathFindingGraph!.nodeAtGridPosition(position) == nil { return [] }
+        if pathFindingGraph != nil && pathFindingGraph!.node(atGridPosition: position) == nil { return [] }
         
         var adjacentNodes: [vector_int2] = []
         
-        for connectedNode in pathFindingGraph!.nodeAtGridPosition(position)!.connectedNodes {
+        for connectedNode in pathFindingGraph!.node(atGridPosition: position)!.connectedNodes {
             
             adjacentNodes.append((connectedNode as! GKGridGraphNode).gridPosition)
         }

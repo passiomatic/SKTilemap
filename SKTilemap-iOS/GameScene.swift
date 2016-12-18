@@ -81,7 +81,7 @@ class GameScene: SKScene {
         sceneCamera.zoomRange.max = 2.0
         
         /* Load Tilemap from .tmx file. */
-        guard let tilemap = SKTilemap.loadTMX(name: "tilemap_example2") else {
+        guard let tilemap = SKTilemap.loadTMX(name: "tilemap_example") else {
             fatalError("Failed to load tilemap.")
         }
         
@@ -125,7 +125,7 @@ class GameScene: SKScene {
             and will not appear in the game. How ever for this example is has been left on. Check out the .tmx file
             to see how it works. */
         //@@FIXME
-        //tilemap.initializeGraph(collisionLayerName: "collision layer", diagonalsAllowed: false)
+        tilemap.initializeGraph(collisionLayerName: "collision layer", diagonalsAllowed: false)
         
         /* The second way is to have each tile have a certain property that you set either programatically or in Tiled.
             The property can be called anything you want and does not need a value. 
@@ -175,7 +175,7 @@ class GameScene: SKScene {
                     /* We want the sign to be "collidable" so remove the node at its position within the path finding
                         graph. */
                     //@@FIXME
-                    //tilemap.removeGraphNodeAtPosition(object.coord)
+                    tilemap.removeGraphNodeAtPosition(position: object.coord)
                 }
             }
             
