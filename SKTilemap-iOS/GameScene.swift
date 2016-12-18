@@ -124,7 +124,6 @@ class GameScene: SKScene {
             way to do things when using Tiled as you get a visual represtantion. This layer is usually set to "hidden"
             and will not appear in the game. How ever for this example is has been left on. Check out the .tmx file
             to see how it works. */
-        //@@FIXME
         tilemap.initializeGraph(collisionLayerName: "collision layer", diagonalsAllowed: false)
         
         /* The second way is to have each tile have a certain property that you set either programatically or in Tiled.
@@ -174,7 +173,6 @@ class GameScene: SKScene {
                     
                     /* We want the sign to be "collidable" so remove the node at its position within the path finding
                         graph. */
-                    //@@FIXME
                     tilemap.removeGraphNodeAtPosition(position: object.coord)
                 }
             }
